@@ -25,6 +25,7 @@ def inspect():
 
     logger.info(f"Inspecting Request: {original_method} {original_uri} from {client_ip}")
 
+    logger.info(f"Payload: {payload}")
     data_to_check = f"{original_uri} {payload}"
 
     for rule in RULES:
