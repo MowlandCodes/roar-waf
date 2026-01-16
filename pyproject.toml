@@ -1,0 +1,10 @@
+[project]
+name = "roar-waf"
+version = "0.1.0"
+description = "Simple Rule Based Web Application Firewall"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "dotenv>=0.9.9",
+    "flask>=3.1.2",
+]
