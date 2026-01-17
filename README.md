@@ -31,7 +31,7 @@ Here are the tools used to build this project:
 - Database: PostgreSQL
 - Containerization: Docker & Docker Compose
 
-## FEATURES (SO-CALLED "SECURITY")
+## FEATURES
 
 Our WAF filters traffic using basic Regex.
 
@@ -42,7 +42,7 @@ Our WAF filters traffic using basic Regex.
 - Log4Shell (Legacy): You still included this? That vulnerability is so 2021.
 - Traffic Inspection: Checks URL params and Body (Head & Tail sampling to save memory, apparently).
 
-## DEPLOYMENT (FOR THE LAZY ONES)
+## DEPLOYMENT
 
 Requirement: You must have Docker and Docker Compose installed. Don't try to install dependencies manually, your laptop might explode.
 
@@ -99,6 +99,7 @@ So you don't get lost in your own code:
 ## DISCLAIMER
 
 **DO NOT USE THIS IN A LARGE PRODUCTION ENVIRONMENT!**
+
 This is just a `Just4Fun` project. I don't take responsibility for any damage done to your system.
 
 ---
