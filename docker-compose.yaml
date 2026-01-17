@@ -6,6 +6,7 @@ services:
       POSTGRES_USER: db_root
       POSTGRES_PASSWORD: db_password_123
       POSTGRES_DB: roar_waf
+      TZ: Asia/Jakarta
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
@@ -28,8 +29,9 @@ services:
     build: .
     container_name: roar_engine
     environment:
-      - PYTHONUNBUFFERED=1
-      - DATABASE_URL=postgresql://db_root:db_password_123@database:5432/roar_waf
+      PYTHONUNBUFFERED: 1
+      DATABASE_URL: postgresql://db_root:db_password_123@database:5432/roar_waf
+      TZ: Asia/Jakarta
     depends_on:
       - database
     networks:
