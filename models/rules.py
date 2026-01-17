@@ -14,7 +14,7 @@ class Rule(db.Model):
     name = Column(String(100), nullable=False, unique=True)
     pattern = Column(Text, nullable=False) 
     description = Column(Text, nullable=False)
-    risk_level = Column(Enum("LOW", "MEDIUM", "HIGH", name="risk_level"), default="MEDIUM")
+    risk_level = Column(Enum("LOW", "MEDIUM", "HIGH", "CRITICAL", name="risk_level"), default="MEDIUM")
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
