@@ -2,6 +2,8 @@ import re
 from collections import deque
 from typing import IO, Deque, Generator
 
+from libs import db
+from models.logs import AttackLog
 from models.rules import Rule
 
 HEAD_SIZE = 1024 * 8 # 8kb
@@ -50,7 +52,7 @@ def read_head(stream: ByteStream) -> bytes:
     return chunk
 
 
-def inspect_head_and_tail(stream: ByteStream, rules: list[Rule]) -> Generator[bytes, None, None]:
+def inspect_head_and_tail(stream: ByteStream, rules: list[Rule], hostname: str, remote_addr: str | None) -> Generator[bytes, None, None]:
     """
     Inspect the head and the tail of the `stream` with the given `rules`
     """
@@ -60,7 +62,17 @@ def inspect_head_and_tail(stream: ByteStream, rules: list[Rule]) -> Generator[by
 
     for rule in rules:
         if re.search(str(rule.pattern), head_text):
-            raise Exception(f"{str(rule.name)} rule triggered")
+            attack_log = AttackLog(
+                src_ip=remote_addr or "unknown",
+                target_domain=hostname, 
+                matched_rule=str(rule.name), 
+                payload_sample=head_text
+            )
+
+            db.session.add(attack_log)
+            db.session.commit()
+
+            raise Exception(f"BLOCKED : {str(rule.name)} rule triggered")
 
     yield head_chunk
 
@@ -83,4 +95,13 @@ def inspect_head_and_tail(stream: ByteStream, rules: list[Rule]) -> Generator[by
 
         for rule in rules:
             if re.search(str(rule.pattern), tail_text):
-                raise Exception(f"{str(rule.name)} rule triggered")
+                attack_log = AttackLog(
+                    src_ip=remote_addr or "unknown",
+                    target_domain=hostname, 
+                    matched_rule=str(rule.name), 
+                    payload_sample=tail_text
+                )
+
+                db.session.add(attack_log)
+                db.session.commit()
+                raise Exception(f"BLOCKED : {str(rule.name)} rule triggered")
