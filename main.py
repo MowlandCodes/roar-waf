@@ -1,8 +1,9 @@
 import os
+import uuid
 
 import requests
 from dotenv import load_dotenv
-from flask import Flask, Response, request
+from flask import Flask, Response, render_template, request
 
 from libs import db
 from libs.helper import inspect_head_and_tail, inspect_url
@@ -23,6 +24,10 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # Initialize the database
 db.init_app(app)
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('error.html', error_details=str(e)), 500
 
 @app.route("/", defaults={"path": ""}, methods=["GET", "POST", "PATCH", "PUT", "DELETE"])
 @app.route("/<path:path>", methods=["GET", "POST", "PATCH", "PUT", "DELETE"])
@@ -73,6 +78,16 @@ def inspect_traffic(path):
 
     except Exception as e:
         if "BLOCKED" in str(e):
-            return Response(f"Connection blocked by Security Policy", status=403)
+            req_id = str(uuid.uuid4()).split('-')[0].upper()
+            
+            reason = str(e).replace("BLOCKED :", "").replace("rule triggered", "").strip()
 
-        return Response(f"Upstream Error", status=502)
+            return render_template(
+                '403.html', 
+                client_ip=request.remote_addr,
+                request_id=req_id,
+                reason=reason
+            ), 403
+
+        logger.error(f"Error inspecting traffic: {str(e)}")
+        return render_template('error.html', error_details=f"Upstream error: {str(e)}"), 502
