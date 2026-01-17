@@ -17,19 +17,15 @@ This project serves as a practical implementation of a "Rule-Based" security mod
 The system follows a standard reverse-proxy architecture:
 
 ```mermaid
-flowchart LR
-    User["Client Request"] --> Nginx["Nginx Reverse Proxy"]
-    Nginx --> Engine["WAF Engine (Flask)"]
+graph LR
+    User["Client"] -- HTTP Request --> Nginx["Nginx Reverse Proxy"]
+    Nginx -- Stream --> WAF["ROAR-WAF Engine (Python)"]
+    WAF -- Query Rules --> DB["(PostgreSQL)"]
 
-    %% Logic Decision
-    Engine -- Log/Rules --> DB[("PostgreSQL")]
-    Engine -- Safe Traffic --> App["Protected App (Whoami)"]
-    Engine -- Attack Detected --> Block["403 Forbidden"]
-
-    %% Styling
-    style Block fill:#f96,stroke:#333,stroke-width:2px,color:white
-    style App fill:#9f6,stroke:#333,stroke-width:2px
-    style DB fill:#69f,stroke:#333,stroke-width:2px
+    subgraph Inspection Logic
+    WAF -- Safe? --> Upstream["Backend Application"]
+    WAF -- Malicious? --> Block["403 Forbidden Page"]
+    end
 ```
 
 1. Nginx (Gateway): Handles incoming connections and buffers traffic.
