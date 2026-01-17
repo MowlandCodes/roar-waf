@@ -18,14 +18,15 @@ The system follows a standard reverse-proxy architecture:
 
 ```mermaid
 flowchart LR
-    User[Client Request] --> Nginx[Nginx Reverse Proxy]
-    Nginx --> Engine[WAF Engine (Flask)]
+    User["Client Request"] --> Nginx["Nginx Reverse Proxy"]
+    Nginx --> Engine["WAF Engine (Flask)"]
 
     %% Logic Decision
-    Engine -- Log/Rules --> DB[(PostgreSQL)]
-    Engine -- Safe Traffic --> App[Protected App (Whoami)]
-    Engine -- Attack Detected --> Block[403 Forbidden]
+    Engine -- Log/Rules --> DB[("PostgreSQL")]
+    Engine -- Safe Traffic --> App["Protected App (Whoami)"]
+    Engine -- Attack Detected --> Block["403 Forbidden"]
 
+    %% Styling
     style Block fill:#f96,stroke:#333,stroke-width:2px,color:white
     style App fill:#9f6,stroke:#333,stroke-width:2px
     style DB fill:#69f,stroke:#333,stroke-width:2px
