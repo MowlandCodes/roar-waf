@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from flask import Flask, Response, request
 
 from libs import db
-from libs.helper import inspect_head_and_tail
+from libs.helper import inspect_head_and_tail, inspect_url
 from libs.logger import logger
 from models import App, Rule
 
@@ -25,7 +25,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
 @app.route("/", defaults={"path": ""}, methods=["GET", "POST", "PATCH", "PUT", "DELETE"])
-@app.route("/<path>", methods=["GET", "POST", "PATCH", "PUT", "DELETE"])
+@app.route("/<path:path>", methods=["GET", "POST", "PATCH", "PUT", "DELETE"])
 def inspect_traffic(path):
     hostname = request.headers.get("Host", "unknown")
 
@@ -39,10 +39,20 @@ def inspect_traffic(path):
     active_rules = Rule.query.filter_by(is_active=True).all()
 
     try:
+        # Check if the url contains any of the active rules
+        inspect_url(request.url, active_rules, hostname, request.remote_addr)
+
+
+        excluded_proxy_headers = ["host", "content-length"]
+        proxy_headers = {
+            k: v for k,v in request.headers.items()
+            if k.lower() not in excluded_proxy_headers
+        }
+
         upstream_response = requests.request(
             method=request.method,
             url=f"{target_app.upstream_url}/{path}",
-            headers={k: v for k,v in request.headers.items() if k != "Host"},
+            headers=proxy_headers,
             data=inspect_head_and_tail(request.stream, active_rules, hostname, remote_addr=request.remote_addr),
             params=request.args.to_dict(),
             stream=True,
