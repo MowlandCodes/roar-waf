@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>System Malfunction</title>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style>
+      .noise-bg {
+        background-color: #111;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+      }
+    </style>
+  </head>
+
+  <body
+    class="noise-bg h-screen w-screen flex flex-col items-center justify-center text-amber-500 font-mono p-4"
+  >
+    <div
+      class="max-w-xl w-full border-t-4 border-amber-600 bg-zinc-900 shadow-2xl p-8 md:p-12 relative overflow-hidden"
+    >
+      <div
+        class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-amber-600 rotate-45 opacity-20"
+      ></div>
+
+      <div class="flex items-center space-x-4 mb-6">
+        <div class="text-6xl">⚠️</div>
+        <div>
+          <h1 class="text-4xl font-bold text-white tracking-tighter">
+            SYSTEM FAILURE
+          </h1>
+          <p class="text-amber-700 font-bold text-xl">ERROR CODE: 500</p>
+        </div>
+      </div>
+
+      <div
+        class="space-y-4 text-zinc-400 text-sm md:text-base border-l-2 border-amber-800 pl-4 my-8"
+      >
+        <p>
+          <span class="text-amber-500 font-bold">>_ CRITICAL_PROCESS_DIED</span
+          ><br />
+          The server encountered an internal error and was unable to complete
+          your request.
+        </p>
+        <p>
+          <span class="text-blue-500 font-bold">>_ DIAGNOSTIC:</span><br />
+          Please contact the System Administrator (that's you, right?) or check
+          the container logs.
+        </p>
+      </div>
+
+      {% if error_details %}
+      <div
+        class="bg-black p-4 rounded text-xs text-red-400 font-mono overflow-x-auto whitespace-pre-wrap border border-zinc-800"
+      >
+        {{ error_details }}
+      </div>
+      {% endif %}
+
+      <div class="mt-8 flex justify-center">
+        <a
+          href="/"
+          class="px-6 py-2 bg-amber-700 hover:bg-amber-600 text-black font-bold uppercase transition-colors duration-200"
+        >
+          Initiate Reboot (Go Home)
+        </a>
+      </div>
+    </div>
+
+    <div class="mt-8 text-zinc-600 text-xs">
+      ROAR-WAF INFRASTRUCTURE // CORE DUMPED
+    </div>
+  </body>
+</html>
