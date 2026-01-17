@@ -141,6 +141,14 @@ Let's make the internet a slightly safer place, one Regex at a time.
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
+## 💰 Donate
+
+Please consider donating if you find this project useful. Support the development and maintenance of this project.
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/P5P11SGF8E)
+
+**Thank you for your support!**
+
 ## ⚠️ Disclaimer
 
 **EDUCATIONAL USE ONLY**. This project is intended for research and educational purposes. It is NOT recommended for critical production environments without further hardening. The author is not responsible for any misuse or damages caused by this software.
