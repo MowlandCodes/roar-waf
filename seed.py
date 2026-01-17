@@ -7,13 +7,13 @@ from models import App, Rule
 
 
 def seed():
-    logger.info("Memulai ritual penanaman data...")
+    logger.info("Start seeding...")
     
     with app.app_context():
         try:
             db.create_all()
         except (OperationalError, Exception) as e:
-            logger.error(f"Terjadi kesalahan saat membuat tabel: {e}")
+            logger.error(f"An error occured while creating table: {e}")
             return
             
         
