@@ -1,8 +1,10 @@
 import re
 from collections import deque
 from typing import IO, Deque, Generator
+from urllib import parse
 
 from libs import db
+from libs.logger import logger
 from models.logs import AttackLog
 from models.rules import Rule
 
@@ -34,20 +36,19 @@ def read_head(stream: ByteStream) -> bytes:
     last_byte = chunk[-1:]
 
     if last_byte not in DELIMITERS:
-        extension = b""
+        extension = stream.read(MAX_EXTEND)
 
-        for _ in range(MAX_EXTEND):
-            char = stream.read(1)
+        if extension:
+            found_idx = -1
+            for i, byte in enumerate(extension):
+                if byte in DELIMITERS:
+                    found_idx = i
+                    break
 
-            if not char:
-                break
-
-            extension += char
-
-            if char in DELIMITERS:
-                break
-
-        chunk += extension
+            if found_idx != -1:
+                chunk += extension[:found_idx + 1]
+            else:
+                chunk += extension
 
     return chunk
 
@@ -62,6 +63,7 @@ def inspect_head_and_tail(stream: ByteStream, rules: list[Rule], hostname: str, 
 
     for rule in rules:
         if re.search(str(rule.pattern), head_text):
+            logger.info(f"BLOCKED : {str(rule.name)} rule triggered")
             attack_log = AttackLog(
                 src_ip=remote_addr or "unknown",
                 target_domain=hostname, 
@@ -95,6 +97,7 @@ def inspect_head_and_tail(stream: ByteStream, rules: list[Rule], hostname: str, 
 
         for rule in rules:
             if re.search(str(rule.pattern), tail_text):
+                logger.info(f"BLOCKED : {str(rule.name)} rule triggered")
                 attack_log = AttackLog(
                     src_ip=remote_addr or "unknown",
                     target_domain=hostname, 
@@ -105,3 +108,22 @@ def inspect_head_and_tail(stream: ByteStream, rules: list[Rule], hostname: str, 
                 db.session.add(attack_log)
                 db.session.commit()
                 raise Exception(f"BLOCKED : {str(rule.name)} rule triggered")
+
+
+def inspect_url(url:str, rules: list[Rule], hostname: str, remote_addr: str | None):
+    parsed_url = parse.unquote_plus(url)
+
+    for rule in rules:
+        if re.search(str(rule.pattern), parsed_url):
+            logger.info(f"BLOCKED : {str(rule.name)} rule triggered")
+            attack_log = AttackLog(
+                src_ip=remote_addr or "unknown",
+                target_domain=hostname, 
+                matched_rule=str(rule.name), 
+                payload_sample=parsed_url
+            )
+
+            db.session.add(attack_log)
+            db.session.commit()
+
+            raise Exception(f"BLOCKED : {str(rule.name)} rule triggered")
