@@ -115,6 +115,32 @@ The WAF listens on port 8080 by default.
 └── templates/              # Error Pages (403, 500)
 ```
 
+## 🤝 Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+- Fork the Project
+- Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+- Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+- Push to the Branch (`git push origin feature/AmazingFeature`)
+- Open a Pull Request
+
+## 📞 Collaboration
+
+Got a crazy idea? Found a vulnerability in this WAF? Or just want to use this for your Thesis (Skripsi)?
+
+We are open to any form of collaboration!
+
+- **Bug Reports**: Please open an issue if you find something broken.
+- **Feature Requests**: Use the "Discussions" tab.
+- **Direct Contact**: Reach out via [@mowland\_\_](https://instagram.com/mowland__).
+
+Let's make the internet a slightly safer place, one Regex at a time.
+
+## 📝 License
+
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
+
 ## ⚠️ Disclaimer
 
 **EDUCATIONAL USE ONLY**. This project is intended for research and educational purposes. It is NOT recommended for critical production environments without further hardening. The author is not responsible for any misuse or damages caused by this software.
