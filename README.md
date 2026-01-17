@@ -118,4 +118,4 @@ The WAF listens on port 8080 by default.
 
 ---
 
-<p align="center"> Built with ❤️ by <a href="https://github.com/mowlandcodes">MowlandCodes</a> </p>
+<p align="center"> Built with ☕ by <a href="https://github.com/mowlandcodes">MowlandCodes</a> </p>
