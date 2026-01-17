@@ -1,3 +1,5 @@
+from typing import Literal
+
 from sqlalchemy import Boolean, Column, DateTime, Enum, Integer, String, Text
 from sqlalchemy.sql import func
 
@@ -18,6 +20,13 @@ class Rule(db.Model):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    def __init__(self, name: str, pattern: str, description: str, risk_level: Literal["LOW", "MEDIUM", "HIGH"] = "MEDIUM", is_active: bool = True):
+        self.name = name
+        self.pattern = pattern
+        self.description = description
+        self.risk_level = risk_level
+        self.is_active = is_active
 
     def __repr__(self):
         return f"<Rule {self.name}>"
