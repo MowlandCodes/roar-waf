@@ -1,55 +1,73 @@
-import logging
-import re
+import os
 
 import requests
+from dotenv import load_dotenv
 from flask import Flask, Response, request
 
+from libs import db
+from libs.helper import inspect_head_and_tail
+from libs.logger import logger
+from models import App, Rule
+
+load_dotenv()
+
 app = Flask(__name__)
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("ROAR-WAF")
 
-BACKEND_URL = "http://backend-app:80"
+db_url = os.getenv("DATABASE_URL", "sqlite:///roar-waf.db") # Fallback to SQLite if DATABASE_URL is not set
 
-RULES = [
-    r"(?i)(union|select|insert|update|delete|drop|alter).*?",
-    r"(?i)<script.*?>",
-    r"(?i)(;|\||`|'|\$)" 
-]
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
 
-@app.route('/', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', "PATCH", 'DELETE'])
-@app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
-def proxy(path):
-    body_payload = request.get_data(as_text=True) # Aman, karena Nginx udah push semua ke sini
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# Initialize the database
+db.init_app(app)
+
+with app.app_context():
+    # Create all databases if it doesn't exist
+    db.create_all()
+
+
+@app.route("/", defaults={"path": ""}, methods=["GET", "POST", "PATCH", "PUT", "DELETE"])
+@app.route("/<path>", methods=["GET", "POST", "PATCH", "PUT", "DELETE"])
+def inspect_traffic(path):
+    hostname = request.headers.get("Host", "unknown")
+
+    target_app: str | None = App.query.filter_by(domain_name=hostname, is_active=True).first()
+
+    if not target_app:
+        logger.error(f"App {hostname} not found")
     
-    for rule in RULES:
-        if re.search(rule, body_payload) or re.search(rule, request.url):
-            logger.warning(f"!!! BLOCKED !!! IP: {request.remote_addr} | Payload: {body_payload}")
-            return Response("Forbidden by ROAR-WAF", status=403)
+        return Response(f"ROAR-WAF: Domain not found {hostname}", status=404)
 
-    # 2. KALAU AMAN, TERUSIN KE BACKEND (Forwarding)
-    logger.info(f"Forwarding to Backend: {path}")
-    
+    active_rules = Rule.query.filter_by(is_active=True).all()
+
     try:
-        # Kirim request persis kayak yang user kirim (Method, Header, Body sama)
-        resp = requests.request(
+        upstream_response = requests.request(
             method=request.method,
-            url=f"{BACKEND_URL}/{path}",
-            headers={key: value for (key, value) in request.headers if key != 'Host'},
-            data=request.get_data(),
-            params=request.args,
-            allow_redirects=True
+            url=f"{target_app.upstream_url}/{path}",
+            headers={k: v for k,v in request.headers.items() if k != "Host"},
+            data=inspect_head_and_tail(request.stream, active_rules, hostname, remote_addr=request.remote_addr),
+            params=request.args.to_dict(),
+            stream=True,
+            allow_redirects=False
         )
-        
-        # 3. BALIKIN JAWABAN BACKEND KE USER
-        excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-        headers = [(name, value) for (name, value) in resp.raw.headers.items()
-                   if name.lower() not in excluded_headers]
-        
-        return Response(resp.content, resp.status_code, headers)
-        
-    except Exception as e:
-        logger.error(f"Backend Error: {e}")
-        return Response("Backend Down", status=502)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+        excluded_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]
+
+        # Catch all response headers except for the excluded headers
+        headers = [(name, value) for (name, value) in upstream_response.raw.headers.items() if name.lower() not in excluded_headers]
+
+
+        return Response(
+            upstream_response.iter_content(chunk_size=4096), # Send the response in chunks of 4kb to avoid memory issues
+            status=upstream_response.status_code,
+            headers=headers
+        )
+
+    except Exception as e:
+        if "BLOCKED" in str(e):
+            return Response(f"Connection blocked by Security Policy", status=403)
+
+        return Response(f"Upstream Error", status=502)
