@@ -21,6 +21,10 @@ def read_head(stream: ByteStream) -> bytes:
     """
     Reads the first `HEAD_SIZE` bytes from the stream,
     extends the stream if needed until one of `DELIMITERS` is found
+
+    :param stream: Stream of bytes to read from
+    :return: Chunk of bytes
+    :rtype: `bytes`
     """
 
     chunk = stream.read(HEAD_SIZE)
@@ -56,6 +60,14 @@ def read_head(stream: ByteStream) -> bytes:
 def inspect_head_and_tail(stream: ByteStream, rules: list[Rule], hostname: str, remote_addr: str | None) -> Generator[bytes, None, None]:
     """
     Inspect the head and the tail of the `stream` with the given `rules`
+
+    :param stream: Stream of bytes to inspect
+    :param rules: List of rules to inspect the stream with
+    :param hostname: Hostname of the application
+    :param remote_addr: IP address of the client
+
+    :return: Generator of bytes
+    :rtype: `Generator[bytes, None, None]`
     """
     head_chunk = read_head(stream)
 
@@ -111,6 +123,18 @@ def inspect_head_and_tail(stream: ByteStream, rules: list[Rule], hostname: str, 
 
 
 def inspect_url(url:str, rules: list[Rule], hostname: str, remote_addr: str | None):
+    """
+    Inspect the given `url` with the given `rules` for possible attacks
+
+    Will raise an `Exception` if a rule is triggered
+
+    :param url: URL to inspect
+    :param rules: List of rules to inspect the URL with
+    :param hostname: Hostname of the application
+    :param remote_addr: IP address of the client
+
+    :return: None
+    """
     parsed_url = parse.unquote_plus(url)
 
     for rule in rules:
