@@ -1,4 +1,16 @@
 services:
+  database:
+    image: postgres:alpine
+    container_name: roar_db
+    environment:
+      POSTGRES_USER: db_root
+      POSTGRES_PASSWORD: db_password_123
+      POSTGRES_DB: roar_waf
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - waf-net
+
   reverse-proxy:
     image: nginx:alpine
     container_name: roar_proxy
@@ -17,6 +29,9 @@ services:
     container_name: roar_engine
     environment:
       - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://db_root:db_password_123@database:5432/roar_waf
+    depends_on:
+      - database
     networks:
       - waf-net
 
@@ -29,3 +44,6 @@ services:
 networks:
   waf-net:
     driver: bridge
+
+volumes:
+  pgdata:
