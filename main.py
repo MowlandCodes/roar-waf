@@ -24,11 +24,6 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # Initialize the database
 db.init_app(app)
 
-with app.app_context():
-    # Create all databases if it doesn't exist
-    db.create_all()
-
-
 @app.route("/", defaults={"path": ""}, methods=["GET", "POST", "PATCH", "PUT", "DELETE"])
 @app.route("/<path>", methods=["GET", "POST", "PATCH", "PUT", "DELETE"])
 def inspect_traffic(path):
