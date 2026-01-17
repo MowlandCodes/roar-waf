@@ -28,6 +28,18 @@ def seed():
                 "risk_level": "HIGH"
             },
             {
+                "name": "SQLi Boolean",
+                "pattern": r"(?i)(or|and)\s+['\"]?[\w\d]+['\"]?\s*=\s*['\"]?[\w\d]+",
+                "description": "Basic SQL Injection (Boolean)",
+                "risk_level": "HIGH"
+            },
+            {
+                "name": "SQLi Probe & Comments",
+                "pattern": r"(?i)(--|#|\/\*|['\";]\s*--|['\";]\s*#|['\";]\s*$)",
+                "description": "SQL Injection (Probe & Comments) Detection",
+                "risk_level": "MEDIUM"
+            },
+            {
                 "name": "XSS Script Tag",
                 "pattern": r"(?i)(<script.*?>|<\/script>|javascript:|onload=|onerror=)",
                 "description": "Cross-Site Scripting (XSS)",
