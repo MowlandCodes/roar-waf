@@ -44,8 +44,7 @@
         </p>
         <p>
           <span class="text-blue-500 font-bold">>_ DIAGNOSTIC:</span><br />
-          Please contact the System Administrator (that's you, right?) or check
-          the container logs.
+          Please contact the System Administrator for further assistance.
         </p>
       </div>
 
@@ -53,7 +52,7 @@
       <div
         class="bg-black p-4 rounded text-xs text-red-400 font-mono overflow-x-auto whitespace-pre-wrap border border-zinc-800"
       >
-        {{ error_details }}
+        {{ error_details.strip() }}
       </div>
       {% endif %}
 
